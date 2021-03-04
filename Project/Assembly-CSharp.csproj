@@ -67,6 +67,7 @@
     <Compile Include="Assets\Script\CSVReader.cs" />
     <Compile Include="Assets\Script\CSVTest.cs" />
     <Compile Include="Assets\Script\DataPlotter.cs" />
+    <Compile Include="Assets\Script\SQLConnector.cs" />
     <Compile Include="Assets\Script\countyExtruder.cs" />
     <Reference Include="UnityEngine">
       <HintPath>C:/Program Files/Unity/2019.3.15f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
@@ -250,6 +251,9 @@
     </Reference>
     <Reference Include="UnityEditor">
       <HintPath>C:/Program Files/Unity/2019.3.15f1/Editor/Data/Managed/UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data">
+      <HintPath>C:/Users/User/Documents/GitHub/project4-Captain-Toasty/Project/Assets/MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>C:/Program Files/Unity/2019.3.15f1/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Globalization;
-
+using MySql.Data.MySqlClient;
 public class countyExtruder : MonoBehaviour
 {
     Vector3 originalPosition; //This is used so we can swap between two different heights by scaling.
@@ -21,6 +21,9 @@ public class countyExtruder : MonoBehaviour
     private List<Dictionary<string, object>> pointList; //This list of dictionaries holds the content of our .csv file
     public string inputfile; //This is the name of the csv file we're using
 
+    MySqlConnection connection;
+    // Use this for initialization 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,17 +39,20 @@ public class countyExtruder : MonoBehaviour
         originalPosition = this.transform.position;
         countyName = name;
 
-        dataValue = getCSVData(0);
-        dataHeight = convertToHeight(dataValue);    
-        
+        SetupSQLConnection();
+        //TestDB();
+       // updateDB();
+
     }
     //This function will get the corresponding value from the CSV database: we can use this to get a county's entry from many years.
-    float getCSVData(int row)
+    void getCSVData(int row)
     {
         object result = pointList[row][countyName];
         float num = (float)(int)result;
         float data = (num);
-        return data;
+
+        dataValue = data;
+        
     }
     //We can't use the raw data from the csv in the map: it would create very tall counties. We need to decrease it.
     float convertToHeight(float value)
@@ -91,7 +97,11 @@ public class countyExtruder : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(randomScale)
+        
+       TestDB();
+        
+        dataHeight = convertToHeight(dataValue);
+        if (randomScale)
         {
             randomExtruding();
         }
@@ -99,5 +109,81 @@ public class countyExtruder : MonoBehaviour
         {
             scaleToValue();
         }
+    }
+
+    private void SetupSQLConnection()
+    {
+        if (connection == null)
+        {
+            string connectionString = "SERVER=localhost;" + "DATABASE=projectData;" + "UID=newuser;" + "pwd=12345; persistsecurityinfo=True;";
+            try
+            {
+                connection = new MySqlConnection(connectionString);
+                connection.Open();
+            }
+            catch (MySqlException ex)
+            {
+                Debug.LogError("MySQL Error: " + ex.ToString());
+            }
+        }
+    }
+    private void CloseSQLConnection()
+    {
+        if (connection != null)
+        {
+            connection.Close();
+        }
+    }
+    public void updateDB()
+    {
+        
+        string commandText = string.Format("UPDATE barleyTable SET Donegal = 100 WHERE year = 1991;");
+        if (connection != null)
+        {
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = commandText;
+            try
+            {
+                //Execute the query 
+                command.ExecuteNonQuery(); 
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("MySQL error: " + ex.ToString());
+            }
+        }
+    }
+    public void TestDB()
+    {
+        string commandText = string.Format("select * from barleyTable;");
+        if (connection != null)
+        {
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = commandText;
+            try
+            {
+
+                //Execute the query 
+                MySqlDataReader sdr = command.ExecuteReader();
+
+                ////Retrieve data from table and Display result
+                sdr.Read();
+                
+                int yield = (int)sdr[name];
+                sdr.Close();dataValue = yield;
+                Debug.Log(name + ": " + yield);
+                
+                command.ExecuteNonQuery();
+                
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("MySQL error: " + ex.ToString());
+            }
+        }
+    }
+    void OnApplicationQuit()
+    {
+        CloseSQLConnection();
     }
 }
